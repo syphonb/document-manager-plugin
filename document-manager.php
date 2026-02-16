@@ -244,10 +244,10 @@ function docmgr_admin_enqueue( $hook ) {
 add_action( 'admin_enqueue_scripts', 'docmgr_admin_enqueue' );
 
 /**
- * ─── Enqueue frontend assets ───
+ * ─── Register frontend assets ───
  */
 function docmgr_frontend_enqueue() {
-    wp_enqueue_style(
+    wp_register_style(
         'docmgr-frontend',
         DOCMGR_URL . 'assets/css/frontend.css',
         array(),
@@ -582,6 +582,8 @@ add_shortcode( 'doc_group', function ( $atts ) {
     if ( ! $group_id ) {
         return '';
     }
+
+    wp_enqueue_style( 'docmgr-frontend' );
 
     global $wpdb;
     $files_table  = $wpdb->prefix . 'docmgr_files';
