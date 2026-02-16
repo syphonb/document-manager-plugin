@@ -129,6 +129,44 @@ function docmgr_render_admin_page() {
 }
 
 /**
+ * Handle group deletion via admin-post endpoint.
+ */
+function docmgr_handle_admin_group_delete() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( 'Unauthorized', 403 );
+    }
+
+    check_admin_referer( 'docmgr_delete_group' );
+
+    global $wpdb;
+    $group_id = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
+    $notice   = 'group_delete_failed';
+
+    if ( ! $group_id ) {
+        $notice = 'invalid_group';
+    } elseif ( ! docmgr_get_group( $group_id ) ) {
+        $notice = 'group_not_found';
+    } else {
+        $deleted_files = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $group_id ), array( '%d' ) );
+        $deleted_group = $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $group_id ), array( '%d' ) );
+
+        if ( false !== $deleted_files && 1 === (int) $deleted_group ) {
+            $notice = 'group_deleted';
+        }
+    }
+
+    $redirect = add_query_arg(
+        'docmgr_notice',
+        $notice,
+        admin_url( 'admin.php?page=docmgr' )
+    );
+
+    wp_safe_redirect( $redirect );
+    exit;
+}
+add_action( 'admin_post_docmgr_delete_group', 'docmgr_handle_admin_group_delete' );
+
+/**
  * ─── Enqueue admin assets ───
  */
 function docmgr_admin_enqueue( $hook ) {

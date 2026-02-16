@@ -327,6 +327,10 @@
     width: 16px;
     height: 16px;
 }
+.docmgr-action-form {
+    display: inline;
+    margin: 0;
+}
 
 /* ── Dropzone ──────────────────────────────────── */
 .docmgr-dropzone {

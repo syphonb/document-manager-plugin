@@ -5,13 +5,16 @@ global $wpdb;
 $groups_table = $wpdb->prefix . 'docmgr_groups';
 $files_table  = $wpdb->prefix . 'docmgr_files';
 
-// Handle inline delete via GET (with nonce)
-if ( isset( $_GET['delete_group'] ) && isset( $_GET['_wpnonce'] ) ) {
-    if ( wp_verify_nonce( $_GET['_wpnonce'], 'docmgr_delete_group_' . absint( $_GET['delete_group'] ) ) ) {
-        $del_id = absint( $_GET['delete_group'] );
-        $wpdb->delete( $files_table, array( 'group_id' => $del_id ), array( '%d' ) );
-        $wpdb->delete( $groups_table, array( 'id' => $del_id ), array( '%d' ) );
+if ( isset( $_GET['docmgr_notice'] ) ) {
+    $notice = sanitize_key( wp_unslash( $_GET['docmgr_notice'] ) );
+    if ( 'group_deleted' === $notice ) {
         echo '<div class="notice notice-success is-dismissible"><p>Group deleted.</p></div>';
+    } elseif ( 'group_delete_failed' === $notice ) {
+        echo '<div class="notice notice-error is-dismissible"><p>Unable to delete group.</p></div>';
+    } elseif ( 'group_not_found' === $notice ) {
+        echo '<div class="notice notice-warning is-dismissible"><p>Group no longer exists.</p></div>';
+    } elseif ( 'invalid_group' === $notice ) {
+        echo '<div class="notice notice-warning is-dismissible"><p>Invalid group request.</p></div>';
     }
 }
 
@@ -58,10 +61,6 @@ $groups = $wpdb->get_results(
                 <tbody>
                     <?php foreach ( $groups as $group ) :
                         $edit_url   = admin_url( 'admin.php?page=docmgr&action=edit&group_id=' . $group->id );
-                        $delete_url = wp_nonce_url(
-                            admin_url( 'admin.php?page=docmgr&delete_group=' . $group->id ),
-                            'docmgr_delete_group_' . $group->id
-                        );
                         $shortcode = '[doc_group id=' . $group->id . ']';
                     ?>
                     <tr>
@@ -86,12 +85,17 @@ $groups = $wpdb->get_results(
                             <a href="<?php echo esc_url( $edit_url ); ?>" class="docmgr-action-btn docmgr-action-edit" title="Edit">
                                 <span class="dashicons dashicons-edit"></span>
                             </a>
-                            <a href="<?php echo esc_url( $delete_url ); ?>"
-                               class="docmgr-action-btn docmgr-action-delete"
-                               title="Delete"
-                               onclick="return confirm('Delete this group and remove all file associations? The files will remain in your Media Library.');">
-                                <span class="dashicons dashicons-trash"></span>
-                            </a>
+                            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="docmgr-action-form">
+                                <?php wp_nonce_field( 'docmgr_delete_group' ); ?>
+                                <input type="hidden" name="action" value="docmgr_delete_group">
+                                <input type="hidden" name="group_id" value="<?php echo esc_attr( $group->id ); ?>">
+                                <button type="submit"
+                                        class="docmgr-action-btn docmgr-action-delete"
+                                        title="Delete"
+                                        onclick="return confirm('Delete this group and remove all file associations? The files will remain in your Media Library.');">
+                                    <span class="dashicons dashicons-trash"></span>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
