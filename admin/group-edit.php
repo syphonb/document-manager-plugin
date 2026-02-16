@@ -13,7 +13,7 @@ $files    = array();
 if ( ! $is_new ) {
     $group = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$groups_table} WHERE id = %d", $group_id ) );
     if ( ! $group ) {
-        echo '<div class="notice notice-error"><p>Group not found.</p></div>';
+        echo '<div class="notice notice-error"><p>' . esc_html__( 'Group not found.', 'document-manager' ) . '</p></div>';
         return;
     }
 
@@ -49,12 +49,12 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=docmgr' ) ); ?>" class="docmgr-back-link">
                 <span class="dashicons dashicons-arrow-left-alt2"></span>
             </a>
-            <?php echo esc_html( $is_new ? 'Create New Group' : 'Edit Group' ); ?>
+            <?php echo esc_html( $is_new ? __( 'Create New Group', 'document-manager' ) : __( 'Edit Group', 'document-manager' ) ); ?>
         </h1>
         <?php if ( ! $is_new ) : ?>
             <div class="docmgr-shortcode-wrap docmgr-header-shortcode">
                 <code><?php echo esc_html( $shortcode ); ?></code>
-                <button type="button" class="docmgr-copy-btn" data-shortcode="<?php echo esc_attr( $shortcode ); ?>" title="Copy shortcode">
+                <button type="button" class="docmgr-copy-btn" data-shortcode="<?php echo esc_attr( $shortcode ); ?>" title="<?php echo esc_attr__( 'Copy shortcode', 'document-manager' ); ?>">
                     <span class="dashicons dashicons-clipboard"></span>
                 </button>
             </div>
@@ -64,17 +64,17 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
     <!-- Group Name -->
     <div class="docmgr-card">
         <div class="docmgr-field-row">
-            <label for="docmgr-group-name" class="docmgr-label">Group Name</label>
+            <label for="docmgr-group-name" class="docmgr-label"><?php esc_html_e( 'Group Name', 'document-manager' ); ?></label>
             <div class="docmgr-field-input-wrap">
                 <input type="text"
                        id="docmgr-group-name"
                        class="regular-text"
                        value="<?php echo $group ? esc_attr( $group->name ) : ''; ?>"
-                       placeholder="Enter group name..."
+                       placeholder="<?php echo esc_attr__( 'Enter group name...', 'document-manager' ); ?>"
                        autofocus>
                 <button type="button" id="docmgr-save-group" class="docmgr-btn-primary" data-group-id="<?php echo esc_attr( $group_id ); ?>">
                     <span class="dashicons dashicons-saved"></span>
-                    <?php echo esc_html( $is_new ? 'Create Group' : 'Save Name' ); ?>
+                    <?php echo esc_html( $is_new ? __( 'Create Group', 'document-manager' ) : __( 'Save Name', 'document-manager' ) ); ?>
                 </button>
             </div>
         </div>
@@ -86,19 +86,19 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
         <!-- Dropzone -->
         <div class="docmgr-card">
             <h2 class="docmgr-card-title">
-                <span class="dashicons dashicons-upload"></span> Upload Documents
+                <span class="dashicons dashicons-upload"></span> <?php esc_html_e( 'Upload Documents', 'document-manager' ); ?>
             </h2>
             <div id="docmgr-dropzone" class="docmgr-dropzone">
                 <div class="docmgr-dropzone-content">
                     <span class="dashicons dashicons-cloud-upload docmgr-dropzone-icon"></span>
-                    <p class="docmgr-dropzone-text">Drag &amp; drop files here</p>
-                    <p class="docmgr-dropzone-hint">or</p>
+                    <p class="docmgr-dropzone-text"><?php esc_html_e( 'Drag & drop files here', 'document-manager' ); ?></p>
+                    <p class="docmgr-dropzone-hint"><?php esc_html_e( 'or', 'document-manager' ); ?></p>
                     <div class="docmgr-dropzone-buttons">
                         <button type="button" id="docmgr-browse-btn" class="docmgr-btn-secondary">
-                            <span class="dashicons dashicons-media-default"></span> Browse Files
+                            <span class="dashicons dashicons-media-default"></span> <?php esc_html_e( 'Browse Files', 'document-manager' ); ?>
                         </button>
                         <button type="button" id="docmgr-media-btn" class="docmgr-btn-secondary">
-                            <span class="dashicons dashicons-admin-media"></span> Media Library
+                            <span class="dashicons dashicons-admin-media"></span> <?php esc_html_e( 'Media Library', 'document-manager' ); ?>
                         </button>
                     </div>
                 </div>
@@ -106,7 +106,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
                     <div class="docmgr-progress-bar">
                         <div class="docmgr-progress-fill" id="docmgr-progress-fill"></div>
                     </div>
-                    <p class="docmgr-progress-text" id="docmgr-progress-text">Uploading...</p>
+                    <p class="docmgr-progress-text" id="docmgr-progress-text"><?php esc_html_e( 'Uploading...', 'document-manager' ); ?></p>
                 </div>
             </div>
             <input type="file" id="docmgr-file-input" multiple style="display:none;">
@@ -116,7 +116,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
         <div class="docmgr-card">
             <h2 class="docmgr-card-title">
                 <span class="dashicons dashicons-list-view"></span>
-                Documents
+                <?php esc_html_e( 'Documents', 'document-manager' ); ?>
                 <span class="docmgr-file-count" id="docmgr-file-count"><?php echo count( $files ); ?></span>
             </h2>
 
@@ -124,7 +124,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
                 <?php if ( empty( $files ) ) : ?>
                     <div class="docmgr-empty-files" id="docmgr-empty-files">
                         <span class="dashicons dashicons-media-document"></span>
-                        <p>No documents yet. Upload some files above!</p>
+                        <p><?php esc_html_e( 'No documents yet. Upload some files above!', 'document-manager' ); ?></p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -134,7 +134,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
 
 <script type="text/html" id="tmpl-docmgr-file-row">
     <div class="docmgr-file-row" data-file-id="{{data.id}}">
-        <div class="docmgr-file-handle" title="Drag to reorder">
+        <div class="docmgr-file-handle" title="<?php echo esc_attr__( 'Drag to reorder', 'document-manager' ); ?>">
             <span class="dashicons dashicons-menu"></span>
         </div>
         <div class="docmgr-file-icon-wrap">
@@ -144,13 +144,13 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
             <div class="docmgr-file-name-wrap">
                 <span class="docmgr-file-name-text">{{data.display_name}}</span>
                 <input type="text" class="docmgr-file-name-input docmgr-hidden" value="{{data.display_name}}">
-                <button type="button" class="docmgr-rename-btn" title="Rename">
+                <button type="button" class="docmgr-rename-btn" title="<?php echo esc_attr__( 'Rename', 'document-manager' ); ?>">
                     <span class="dashicons dashicons-edit-page"></span>
                 </button>
-                <button type="button" class="docmgr-rename-save docmgr-hidden" title="Save name">
+                <button type="button" class="docmgr-rename-save docmgr-hidden" title="<?php echo esc_attr__( 'Save name', 'document-manager' ); ?>">
                     <span class="dashicons dashicons-yes-alt"></span>
                 </button>
-                <button type="button" class="docmgr-rename-cancel docmgr-hidden" title="Cancel">
+                <button type="button" class="docmgr-rename-cancel docmgr-hidden" title="<?php echo esc_attr__( 'Cancel', 'document-manager' ); ?>">
                     <span class="dashicons dashicons-dismiss"></span>
                 </button>
             </div>
@@ -160,10 +160,10 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
             </div>
         </div>
         <div class="docmgr-file-actions">
-            <a href="{{data.url}}" class="docmgr-action-btn" title="Download" target="_blank" rel="noopener noreferrer" download>
+            <a href="{{data.url}}" class="docmgr-action-btn" title="<?php echo esc_attr__( 'Download', 'document-manager' ); ?>" target="_blank" rel="noopener noreferrer" download>
                 <span class="dashicons dashicons-download"></span>
             </a>
-            <button type="button" class="docmgr-action-btn docmgr-remove-btn" title="Remove from group" data-file-id="{{data.id}}">
+            <button type="button" class="docmgr-action-btn docmgr-remove-btn" title="<?php echo esc_attr__( 'Remove from group', 'document-manager' ); ?>" data-file-id="{{data.id}}">
                 <span class="dashicons dashicons-no-alt"></span>
             </button>
         </div>

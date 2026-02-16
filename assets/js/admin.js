@@ -28,6 +28,13 @@
         return ext ? ext.toUpperCase() : 'FILE';
     }
 
+    function t(key, fallback) {
+        if (typeof docmgr !== 'undefined' && docmgr.i18n && typeof docmgr.i18n[key] !== 'undefined') {
+            return docmgr.i18n[key];
+        }
+        return fallback;
+    }
+
     function updateFileCount() {
         var count = $('#docmgr-file-list .docmgr-file-row').length;
         $('#docmgr-file-count').text(count);
@@ -36,7 +43,7 @@
                 $('#docmgr-file-list').html(
                     '<div class="docmgr-empty-files" id="docmgr-empty-files">' +
                     '<span class="dashicons dashicons-media-document"></span>' +
-                    '<p>No documents yet. Upload some files above!</p>' +
+                    '<p>' + t('noDocumentsYet', 'No documents yet. Upload some files above!') + '</p>' +
                     '</div>'
                 );
             }
@@ -55,7 +62,7 @@
 
         var $row = $('<div>', { 'class': 'docmgr-file-row' }).attr('data-file-id', fileId);
 
-        var $handle = $('<div>', { 'class': 'docmgr-file-handle', 'title': 'Drag to reorder' })
+        var $handle = $('<div>', { 'class': 'docmgr-file-handle', 'title': t('dragToReorder', 'Drag to reorder') })
             .append($('<span>', { 'class': 'dashicons dashicons-menu' }));
 
         var $icon = $('<div>', { 'class': 'docmgr-file-icon-wrap' })
@@ -69,15 +76,15 @@
             .append($('<span>', { 'class': 'docmgr-file-name-text' }).text(fileName))
             .append($('<input>', { 'type': 'text', 'class': 'docmgr-file-name-input docmgr-hidden' }).val(fileName))
             .append(
-                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-btn', 'title': 'Rename' })
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-btn', 'title': t('rename', 'Rename') })
                     .append($('<span>', { 'class': 'dashicons dashicons-edit-page' }))
             )
             .append(
-                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-save docmgr-hidden', 'title': 'Save name' })
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-save docmgr-hidden', 'title': t('saveName', 'Save name') })
                     .append($('<span>', { 'class': 'dashicons dashicons-yes-alt' }))
             )
             .append(
-                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-cancel docmgr-hidden', 'title': 'Cancel' })
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-cancel docmgr-hidden', 'title': t('cancel', 'Cancel') })
                     .append($('<span>', { 'class': 'dashicons dashicons-dismiss' }))
             );
 
@@ -89,7 +96,7 @@
 
         var $download = $('<a>', {
             'class': 'docmgr-action-btn',
-            'title': 'Download',
+            'title': t('download', 'Download'),
             'target': '_blank',
             'rel': 'noopener noreferrer',
             'download': 'download'
@@ -98,7 +105,7 @@
         var $remove = $('<button>', {
             'type': 'button',
             'class': 'docmgr-action-btn docmgr-remove-btn',
-            'title': 'Remove from group'
+            'title': t('removeFromGroup', 'Remove from group')
         }).attr('data-file-id', fileId).append($('<span>', { 'class': 'dashicons dashicons-no-alt' }));
 
         var $actions = $('<div>', { 'class': 'docmgr-file-actions' }).append($download).append($remove);
@@ -130,7 +137,7 @@
                     nonce: docmgr.nonce,
                     order: order
                 }).done(function (res) {
-                    if (res.success) showToast('Order saved', 'success');
+                    if (res.success) showToast(t('orderSaved', 'Order saved'), 'success');
                 });
             }
         });
@@ -158,7 +165,7 @@
         var isNew    = !groupId;
 
         if (!name) {
-            showToast('Please enter a group name.', 'error');
+            showToast(t('pleaseEnterGroupName', 'Please enter a group name.'), 'error');
             return;
         }
 
@@ -172,17 +179,17 @@
         }).done(function (res) {
             if (res.success) {
                 if (isNew) {
-                    showToast('Group created!', 'success');
+                    showToast(t('groupCreated', 'Group created!'), 'success');
                     // Redirect to edit page
                     window.location.href = docmgr.ajax_url.replace('/wp-admin/admin-ajax.php', '/wp-admin/admin.php?page=docmgr&action=edit&group_id=' + res.data.id);
                 } else {
-                    showToast('Group name saved.', 'success');
+                    showToast(t('groupNameSaved', 'Group name saved.'), 'success');
                 }
             } else {
                 showToast(res.data || 'Error', 'error');
             }
         }).fail(function () {
-            showToast('Request failed.', 'error');
+            showToast(t('requestFailed', 'Request failed.'), 'error');
         }).always(function () {
             $btn.prop('disabled', false);
         });
@@ -196,7 +203,7 @@
         var $btn = $(this);
         navigator.clipboard.writeText(shortcode).then(function () {
             $btn.addClass('copied');
-            showToast('Shortcode copied!', 'success');
+            showToast(t('shortcodeCopied', 'Shortcode copied!'), 'success');
             setTimeout(function () { $btn.removeClass('copied'); }, 2000);
         });
     });
@@ -234,8 +241,8 @@
     /* ── Media Library button ─────────────────── */
     $('#docmgr-media-btn').on('click', function () {
         var frame = wp.media({
-            title: 'Select Documents',
-            button: { text: 'Add to Group' },
+            title: t('selectDocuments', 'Select Documents'),
+            button: { text: t('addToGroup', 'Add to Group') },
             multiple: true
         });
 
@@ -263,9 +270,9 @@
                     });
                     initSortable();
                     updateFileCount();
-                    showToast(res.data.length + ' file(s) added.', 'success');
+                    showToast(res.data.length + ' ' + t('filesAddedSuffix', 'file(s) added.'), 'success');
                 } else if (res.success) {
-                    showToast('Files already in this group.', '');
+                    showToast(t('filesAlreadyInGroup', 'Files already in this group.'), '');
                 }
             });
         });
@@ -277,7 +284,7 @@
     function uploadFiles(fileList) {
         var groupId = $('#docmgr-file-list').data('group-id');
         if (!groupId) {
-            showToast('Save the group first.', 'error');
+            showToast(t('saveGroupFirst', 'Save the group first.'), 'error');
             return;
         }
 
@@ -295,7 +302,7 @@
         var $text     = $('#docmgr-progress-text');
         $progress.removeClass('docmgr-hidden');
         $fill.css('width', '0%');
-        $text.text('Uploading ' + fileList.length + ' file(s)...');
+        $text.text(t('uploadingPrefix', 'Uploading') + ' ' + fileList.length + ' file(s)...');
 
         $.ajax({
             url: docmgr.ajax_url,
@@ -309,7 +316,7 @@
                     if (e.lengthComputable) {
                         var pct = Math.round((e.loaded / e.total) * 100);
                         $fill.css('width', pct + '%');
-                        $text.text('Uploading... ' + pct + '%');
+                        $text.text(t('uploadingProgress', 'Uploading...') + ' ' + pct + '%');
                     }
                 });
                 return xhr;
@@ -322,12 +329,12 @@
                 });
                 initSortable();
                 updateFileCount();
-                showToast(res.data.length + ' file(s) uploaded!', 'success');
+                showToast(res.data.length + ' ' + t('filesUploadedSuffix', 'file(s) uploaded!'), 'success');
             } else {
-                showToast('Upload failed.', 'error');
+                showToast(t('uploadFailed', 'Upload failed.'), 'error');
             }
         }).fail(function () {
-            showToast('Upload request failed.', 'error');
+            showToast(t('uploadRequestFailed', 'Upload request failed.'), 'error');
         }).always(function () {
             setTimeout(function () {
                 $progress.addClass('docmgr-hidden');
@@ -362,7 +369,7 @@
         var newName = $row.find('.docmgr-file-name-input').val().trim();
 
         if (!newName) {
-            showToast('Name cannot be empty.', 'error');
+            showToast(t('nameCannotBeEmpty', 'Name cannot be empty.'), 'error');
             return;
         }
 
@@ -377,7 +384,7 @@
                 $row.find('.docmgr-file-name-input').addClass('docmgr-hidden');
                 $row.find('.docmgr-rename-btn').removeClass('docmgr-hidden');
                 $row.find('.docmgr-rename-save, .docmgr-rename-cancel').addClass('docmgr-hidden');
-                showToast('Renamed!', 'success');
+                showToast(t('renamed', 'Renamed!'), 'success');
             }
         });
     });
@@ -395,7 +402,7 @@
        Remove File
        ═══════════════════════════════════════════════ */
     $(document).on('click', '.docmgr-remove-btn', function () {
-        if (!confirm('Remove this file from the group? (The file remains in your Media Library.)')) return;
+        if (!confirm(t('removeConfirm', 'Remove this file from the group? (The file remains in your Media Library.)'))) return;
 
         var $row   = $(this).closest('.docmgr-file-row');
         var fileId = $(this).data('file-id');
@@ -410,7 +417,7 @@
                     $(this).remove();
                     updateFileCount();
                 });
-                showToast('File removed.', 'success');
+                showToast(t('fileRemoved', 'File removed.'), 'success');
             }
         });
     });
