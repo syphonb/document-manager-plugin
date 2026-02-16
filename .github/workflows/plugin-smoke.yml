@@ -1,0 +1,32 @@
+name: Plugin Smoke Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: PHP syntax checks
+        run: |
+          php -l document-manager.php
+          php -l admin/group-list.php
+          php -l admin/group-edit.php
+
+      - name: JavaScript syntax checks
+        run: node --check assets/js/admin.js
