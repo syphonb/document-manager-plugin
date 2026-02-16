@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'DOCMGR_VERSION', '1.0.0' );
+define( 'DOCMGR_DB_VERSION', '1.1.0' );
 define( 'DOCMGR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DOCMGR_URL', plugin_dir_url( __FILE__ ) );
 
@@ -104,16 +105,18 @@ function docmgr_delete_group_records( $group_id ) {
 }
 
 /**
- * ─── Activation: create DB tables ───
+ * Build database schema SQL.
+ *
+ * @return string
  */
-function docmgr_activate() {
+function docmgr_get_schema_sql() {
     global $wpdb;
     $charset = $wpdb->get_charset_collate();
 
     $groups_table = $wpdb->prefix . 'docmgr_groups';
     $files_table  = $wpdb->prefix . 'docmgr_files';
 
-    $sql = "CREATE TABLE {$groups_table} (
+    return "CREATE TABLE {$groups_table} (
         id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
         name varchar(255) NOT NULL DEFAULT '',
         created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -129,16 +132,57 @@ function docmgr_activate() {
         sort_order int(11) NOT NULL DEFAULT 0,
         created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
+        UNIQUE KEY group_attachment (group_id, attachment_id),
         KEY group_id (group_id),
         KEY sort_order (sort_order)
     ) {$charset};";
+}
 
+/**
+ * Install or upgrade plugin DB schema.
+ */
+function docmgr_install_schema() {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta( $sql );
+    dbDelta( docmgr_get_schema_sql() );
+    update_option( 'docmgr_db_version', DOCMGR_DB_VERSION );
+}
 
-    update_option( 'docmgr_db_version', DOCMGR_VERSION );
+/**
+ * Activation callback.
+ */
+function docmgr_activate() {
+    docmgr_install_schema();
 }
 register_activation_hook( __FILE__, 'docmgr_activate' );
+
+/**
+ * Ensure schema is current after plugin updates.
+ */
+function docmgr_maybe_upgrade() {
+    $installed_version = get_option( 'docmgr_db_version', '0.0.0' );
+    if ( version_compare( (string) $installed_version, DOCMGR_DB_VERSION, '<' ) ) {
+        docmgr_install_schema();
+    }
+}
+add_action( 'plugins_loaded', 'docmgr_maybe_upgrade' );
+
+/**
+ * Cleanup plugin data on uninstall.
+ */
+function docmgr_uninstall() {
+    global $wpdb;
+
+    delete_option( 'docmgr_db_version' );
+
+    $remove_data = apply_filters( 'docmgr_remove_data_on_uninstall', true );
+    if ( ! $remove_data ) {
+        return;
+    }
+
+    $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}docmgr_files" );
+    $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}docmgr_groups" );
+}
+register_uninstall_hook( __FILE__, 'docmgr_uninstall' );
 
 /**
  * ─── Admin menu ───
