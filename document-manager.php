@@ -4,7 +4,7 @@
  * Plugin URI:
  * Description: Create document groups, bulk upload files via drag-and-drop, rename/reorder/remove files, and embed download lists via shortcode.
  * Version: 1.0.0
- * Author: Custom
+ * Author: CRISPM
  * License: GPL v2 or later
  * Text Domain: document-manager
  */
