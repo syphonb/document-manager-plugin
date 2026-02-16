@@ -60,6 +60,50 @@ function docmgr_get_file( $file_id ) {
 }
 
 /**
+ * Delete a group and all file associations in one unit of work.
+ *
+ * @param int $group_id Group ID.
+ * @return true|WP_Error
+ */
+function docmgr_delete_group_records( $group_id ) {
+    global $wpdb;
+
+    $group_id = absint( $group_id );
+    if ( ! $group_id ) {
+        return new WP_Error( 'invalid_group', 'Invalid group.' );
+    }
+
+    if ( ! docmgr_get_group( $group_id ) ) {
+        return new WP_Error( 'group_not_found', 'Group not found.' );
+    }
+
+    $has_transaction = false !== $wpdb->query( 'START TRANSACTION' );
+
+    $deleted_files = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $group_id ), array( '%d' ) );
+    if ( false === $deleted_files ) {
+        if ( $has_transaction ) {
+            $wpdb->query( 'ROLLBACK' );
+        }
+        return new WP_Error( 'group_delete_failed', 'Failed to delete group files.' );
+    }
+
+    $deleted_group = $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $group_id ), array( '%d' ) );
+    if ( false === $deleted_group || 0 === (int) $deleted_group ) {
+        if ( $has_transaction ) {
+            $wpdb->query( 'ROLLBACK' );
+        }
+        return new WP_Error( 'group_delete_failed', 'Failed to delete group.' );
+    }
+
+    if ( $has_transaction && false === $wpdb->query( 'COMMIT' ) ) {
+        $wpdb->query( 'ROLLBACK' );
+        return new WP_Error( 'group_delete_failed', 'Failed to finalize group deletion.' );
+    }
+
+    return true;
+}
+
+/**
  * ─── Activation: create DB tables ───
  */
 function docmgr_activate() {
@@ -138,21 +182,14 @@ function docmgr_handle_admin_group_delete() {
 
     check_admin_referer( 'docmgr_delete_group' );
 
-    global $wpdb;
     $group_id = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
-    $notice   = 'group_delete_failed';
+    $notice   = 'group_deleted';
+    $deleted  = docmgr_delete_group_records( $group_id );
 
-    if ( ! $group_id ) {
-        $notice = 'invalid_group';
-    } elseif ( ! docmgr_get_group( $group_id ) ) {
-        $notice = 'group_not_found';
-    } else {
-        $deleted_files = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $group_id ), array( '%d' ) );
-        $deleted_group = $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $group_id ), array( '%d' ) );
-
-        if ( false !== $deleted_files && 1 === (int) $deleted_group ) {
-            $notice = 'group_deleted';
-        }
+    if ( is_wp_error( $deleted ) ) {
+        $notice = in_array( $deleted->get_error_code(), array( 'invalid_group', 'group_not_found' ), true )
+            ? $deleted->get_error_code()
+            : 'group_delete_failed';
     }
 
     $redirect = add_query_arg(
@@ -285,25 +322,10 @@ add_action( 'wp_ajax_docmgr_update_group', function () {
 /* ── Delete Group ─────────────────────────────── */
 add_action( 'wp_ajax_docmgr_delete_group', function () {
     docmgr_verify_ajax();
-    global $wpdb;
     $id = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
-    if ( ! $id ) {
-        wp_send_json_error( 'Invalid group.' );
-    }
-
-    $group = docmgr_get_group( $id );
-    if ( ! $group ) {
-        wp_send_json_error( 'Group not found.' );
-    }
-
-    $deleted_files = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $id ), array( '%d' ) );
-    if ( false === $deleted_files ) {
-        wp_send_json_error( 'Failed to delete group files.' );
-    }
-
-    $deleted_group = $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $id ), array( '%d' ) );
-    if ( false === $deleted_group || 0 === $deleted_group ) {
-        wp_send_json_error( 'Failed to delete group.' );
+    $deleted = docmgr_delete_group_records( $id );
+    if ( is_wp_error( $deleted ) ) {
+        wp_send_json_error( $deleted->get_error_message() );
     }
 
     wp_send_json_success();
