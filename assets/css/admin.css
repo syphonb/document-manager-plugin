@@ -1,0 +1,641 @@
+/* ═══════════════════════════════════════════════════════════════
+   Document Manager – Admin Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Layout ────────────────────────────────────── */
+.docmgr-wrap {
+    max-width: 960px;
+    margin: 20px auto 40px;
+}
+
+.docmgr-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.docmgr-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 23px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0;
+}
+
+.docmgr-header h1 .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: #2271b1;
+}
+
+.docmgr-back-link {
+    text-decoration: none;
+    color: #50575e;
+    transition: color 0.15s;
+}
+.docmgr-back-link:hover {
+    color: #2271b1;
+}
+
+.docmgr-header-shortcode {
+    margin-left: auto;
+}
+
+.docmgr-hidden {
+    display: none !important;
+}
+
+/* ── Cards ─────────────────────────────────────── */
+.docmgr-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.docmgr-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.docmgr-card-title .dashicons {
+    color: #2271b1;
+}
+
+/* ── Buttons ───────────────────────────────────── */
+.docmgr-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+    line-height: 1.4;
+}
+.docmgr-btn-primary:hover,
+.docmgr-btn-primary:focus {
+    background: #135e96;
+    color: #fff;
+    transform: translateY(-1px);
+}
+.docmgr-btn-primary .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.docmgr-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f6f7f7;
+    color: #2271b1;
+    border: 1px solid #2271b1;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    line-height: 1.4;
+}
+.docmgr-btn-secondary:hover {
+    background: #2271b1;
+    color: #fff;
+}
+.docmgr-btn-secondary .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Group Name Field ──────────────────────────── */
+.docmgr-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.docmgr-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+}
+.docmgr-field-input-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.docmgr-field-input-wrap input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #8c8f94;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.15s;
+}
+.docmgr-field-input-wrap input[type="text"]:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+/* ── Empty State ───────────────────────────────── */
+.docmgr-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+}
+.docmgr-empty-icon .dashicons {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #c3c4c7;
+    margin-bottom: 16px;
+}
+.docmgr-empty-state h2 {
+    font-size: 18px;
+    color: #1d2327;
+    margin: 0 0 8px;
+}
+.docmgr-empty-state p {
+    color: #646970;
+    margin: 0 0 24px;
+}
+
+.docmgr-empty-files {
+    text-align: center;
+    padding: 40px 20px;
+    color: #646970;
+}
+.docmgr-empty-files .dashicons {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #c3c4c7;
+    display: block;
+    margin: 0 auto 12px;
+}
+
+/* ── Table ─────────────────────────────────────── */
+.docmgr-table-wrap {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.docmgr-table {
+    border: none;
+    border-radius: 8px;
+}
+.docmgr-table thead th {
+    background: #f6f7f7;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+    padding: 12px 16px;
+    border-bottom: 1px solid #c3c4c7;
+}
+.docmgr-table tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+.docmgr-table .column-name { width: 30%; }
+.docmgr-table .column-count { width: 80px; text-align: center; }
+.docmgr-table .column-shortcode { width: 25%; }
+.docmgr-table .column-date { width: 15%; }
+.docmgr-table .column-actions { width: 100px; text-align: center; }
+
+.docmgr-table tbody td.column-name strong a {
+    color: #2271b1;
+    text-decoration: none;
+    font-size: 14px;
+}
+.docmgr-table tbody td.column-name strong a:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+/* ── Badge ─────────────────────────────────────── */
+.docmgr-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 12px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ── Shortcode Copy ────────────────────────────── */
+.docmgr-shortcode-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+.docmgr-shortcode-wrap code {
+    background: none;
+    padding: 0;
+    font-size: 12px;
+    color: #1d2327;
+}
+.docmgr-copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #2271b1;
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+}
+.docmgr-copy-btn:hover {
+    background: #2271b1;
+    color: #fff;
+}
+.docmgr-copy-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+.docmgr-copy-btn.copied {
+    color: #00a32a;
+}
+
+/* ── Action Buttons (table) ────────────────────── */
+.docmgr-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f6f7f7;
+    border-radius: 6px;
+    color: #50575e;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    margin: 0 2px;
+}
+.docmgr-action-btn:hover {
+    transform: translateY(-1px);
+}
+.docmgr-action-edit:hover {
+    background: #2271b1;
+    color: #fff;
+}
+.docmgr-action-delete:hover {
+    background: #d63638;
+    color: #fff;
+}
+.docmgr-action-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Dropzone ──────────────────────────────────── */
+.docmgr-dropzone {
+    border: 2px dashed #c3c4c7;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.25s;
+    background: #fafafa;
+    position: relative;
+}
+.docmgr-dropzone.dragover {
+    border-color: #2271b1;
+    background: #f0f6fc;
+    box-shadow: 0 0 0 4px rgba(34, 113, 177, 0.1);
+}
+.docmgr-dropzone-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #c3c4c7;
+    transition: color 0.25s;
+}
+.docmgr-dropzone.dragover .docmgr-dropzone-icon {
+    color: #2271b1;
+}
+.docmgr-dropzone-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1d2327;
+    margin: 12px 0 4px;
+}
+.docmgr-dropzone-hint {
+    font-size: 13px;
+    color: #646970;
+    margin: 0 0 16px;
+}
+.docmgr-dropzone-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ── Upload Progress ───────────────────────────── */
+.docmgr-upload-progress {
+    margin-top: 20px;
+}
+.docmgr-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #dcdcde;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.docmgr-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2271b1, #72aee6);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+.docmgr-progress-text {
+    font-size: 13px;
+    color: #646970;
+    margin: 8px 0 0;
+}
+
+/* ── File Count Badge ──────────────────────────── */
+.docmgr-file-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 12px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+/* ── File List ─────────────────────────────────── */
+.docmgr-file-list {
+    min-height: 40px;
+}
+
+.docmgr-file-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+.docmgr-file-row:hover {
+    border-color: #2271b1;
+    box-shadow: 0 2px 8px rgba(34,113,177,0.08);
+}
+
+/* Drag handle */
+.docmgr-file-handle {
+    cursor: grab;
+    color: #c3c4c7;
+    transition: color 0.15s;
+    flex-shrink: 0;
+}
+.docmgr-file-handle:hover {
+    color: #2271b1;
+}
+.docmgr-file-row.sortable-ghost {
+    opacity: 0.4;
+    background: #f0f6fc;
+}
+.docmgr-file-row.sortable-drag {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* File icon */
+.docmgr-file-icon-wrap {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+.docmgr-file-type-icon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+/* Extension-based colours */
+.docmgr-file-type-icon[data-ext="pdf"]  { background: #d63638; }
+.docmgr-file-type-icon[data-ext="doc"],
+.docmgr-file-type-icon[data-ext="docx"] { background: #2271b1; }
+.docmgr-file-type-icon[data-ext="xls"],
+.docmgr-file-type-icon[data-ext="xlsx"],
+.docmgr-file-type-icon[data-ext="csv"]  { background: #00a32a; }
+.docmgr-file-type-icon[data-ext="ppt"],
+.docmgr-file-type-icon[data-ext="pptx"] { background: #d63638; }
+.docmgr-file-type-icon[data-ext="zip"],
+.docmgr-file-type-icon[data-ext="rar"]  { background: #8c8f94; }
+.docmgr-file-type-icon[data-ext="jpg"],
+.docmgr-file-type-icon[data-ext="jpeg"],
+.docmgr-file-type-icon[data-ext="png"],
+.docmgr-file-type-icon[data-ext="gif"],
+.docmgr-file-type-icon[data-ext="svg"]  { background: #9b59b6; }
+.docmgr-file-type-icon[data-ext="mp4"],
+.docmgr-file-type-icon[data-ext="mov"]  { background: #e67e22; }
+.docmgr-file-type-icon[data-ext="mp3"],
+.docmgr-file-type-icon[data-ext="wav"]  { background: #e74c3c; }
+.docmgr-file-type-icon[data-ext="txt"]  { background: #95a5a6; }
+
+/* File info */
+.docmgr-file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.docmgr-file-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.docmgr-file-name-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d2327;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.docmgr-file-name-input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #2271b1;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.docmgr-rename-btn,
+.docmgr-rename-save,
+.docmgr-rename-cancel {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: #646970;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+}
+.docmgr-rename-btn:hover { color: #2271b1; }
+.docmgr-rename-save:hover { color: #00a32a; }
+.docmgr-rename-cancel:hover { color: #d63638; }
+.docmgr-rename-btn .dashicons,
+.docmgr-rename-save .dashicons,
+.docmgr-rename-cancel .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* File meta */
+.docmgr-file-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #646970;
+}
+
+.docmgr-file-ext-badge {
+    display: inline-block;
+    background: #f0f0f1;
+    color: #50575e;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* File actions */
+.docmgr-file-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.docmgr-remove-btn:hover {
+    background: #d63638 !important;
+    color: #fff !important;
+}
+
+/* ── Toast Notification ────────────────────────── */
+.docmgr-toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: #1d2327;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.docmgr-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.docmgr-toast.success {
+    background: #00a32a;
+}
+.docmgr-toast.error {
+    background: #d63638;
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 782px) {
+    .docmgr-wrap {
+        margin: 10px;
+    }
+    .docmgr-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .docmgr-header-shortcode {
+        margin-left: 0;
+    }
+    .docmgr-field-input-wrap {
+        flex-direction: column;
+    }
+    .docmgr-file-row {
+        flex-wrap: wrap;
+    }
+    .docmgr-file-info {
+        width: 100%;
+    }
+    .docmgr-table .column-shortcode {
+        display: none;
+    }
+}
