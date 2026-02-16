@@ -160,8 +160,8 @@ add_action( 'admin_menu', 'docmgr_admin_menu' );
  * Route to the correct admin template.
  */
 function docmgr_render_admin_page() {
-    $action   = isset( $_GET['action'] ) ? sanitize_text_field( $_GET['action'] ) : 'list';
-    $group_id = isset( $_GET['group_id'] ) ? absint( $_GET['group_id'] ) : 0;
+    $action   = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : 'list';
+    $group_id = isset( $_GET['group_id'] ) ? absint( wp_unslash( $_GET['group_id'] ) ) : 0;
 
     if ( $action === 'edit' && $group_id > 0 ) {
         include DOCMGR_PATH . 'admin/group-edit.php';
@@ -274,7 +274,7 @@ function docmgr_verify_ajax() {
 add_action( 'wp_ajax_docmgr_create_group', function () {
     docmgr_verify_ajax();
     global $wpdb;
-    $name = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+    $name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
     if ( empty( $name ) ) {
         wp_send_json_error( 'Group name is required.' );
     }
@@ -294,8 +294,8 @@ add_action( 'wp_ajax_docmgr_create_group', function () {
 add_action( 'wp_ajax_docmgr_update_group', function () {
     docmgr_verify_ajax();
     global $wpdb;
-    $id   = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
-    $name = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+    $id   = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
+    $name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
     if ( ! $id || empty( $name ) ) {
         wp_send_json_error( 'Invalid data.' );
     }
@@ -322,7 +322,7 @@ add_action( 'wp_ajax_docmgr_update_group', function () {
 /* ── Delete Group ─────────────────────────────── */
 add_action( 'wp_ajax_docmgr_delete_group', function () {
     docmgr_verify_ajax();
-    $id = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
+    $id = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
     $deleted = docmgr_delete_group_records( $id );
     if ( is_wp_error( $deleted ) ) {
         wp_send_json_error( $deleted->get_error_message() );
@@ -336,7 +336,7 @@ add_action( 'wp_ajax_docmgr_upload_files', function () {
     docmgr_verify_ajax();
     global $wpdb;
 
-    $group_id = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
+    $group_id = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
     if ( ! $group_id ) {
         wp_send_json_error( 'No group specified.' );
     }
@@ -421,8 +421,8 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
     docmgr_verify_ajax();
     global $wpdb;
 
-    $group_id       = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
-    $attachment_ids = isset( $_POST['attachment_ids'] ) ? array_map( 'absint', (array) $_POST['attachment_ids'] ) : array();
+    $group_id       = isset( $_POST['group_id'] ) ? absint( wp_unslash( $_POST['group_id'] ) ) : 0;
+    $attachment_ids = isset( $_POST['attachment_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['attachment_ids'] ) ) : array();
 
     if ( ! $group_id || empty( $attachment_ids ) ) {
         wp_send_json_error( 'Invalid data.' );
@@ -491,8 +491,8 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
 add_action( 'wp_ajax_docmgr_rename_file', function () {
     docmgr_verify_ajax();
     global $wpdb;
-    $file_id = isset( $_POST['file_id'] ) ? absint( $_POST['file_id'] ) : 0;
-    $name    = isset( $_POST['display_name'] ) ? sanitize_text_field( $_POST['display_name'] ) : '';
+    $file_id = isset( $_POST['file_id'] ) ? absint( wp_unslash( $_POST['file_id'] ) ) : 0;
+    $name    = isset( $_POST['display_name'] ) ? sanitize_text_field( wp_unslash( $_POST['display_name'] ) ) : '';
     if ( ! $file_id || empty( $name ) ) {
         wp_send_json_error( 'Invalid data.' );
     }
@@ -521,7 +521,7 @@ add_action( 'wp_ajax_docmgr_rename_file', function () {
 add_action( 'wp_ajax_docmgr_remove_file', function () {
     docmgr_verify_ajax();
     global $wpdb;
-    $file_id = isset( $_POST['file_id'] ) ? absint( $_POST['file_id'] ) : 0;
+    $file_id = isset( $_POST['file_id'] ) ? absint( wp_unslash( $_POST['file_id'] ) ) : 0;
     if ( ! $file_id ) {
         wp_send_json_error( 'Invalid file.' );
     }
@@ -543,7 +543,7 @@ add_action( 'wp_ajax_docmgr_remove_file', function () {
 add_action( 'wp_ajax_docmgr_reorder_files', function () {
     docmgr_verify_ajax();
     global $wpdb;
-    $order = isset( $_POST['order'] ) ? array_map( 'absint', (array) $_POST['order'] ) : array();
+    $order = isset( $_POST['order'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['order'] ) ) : array();
     if ( empty( $order ) ) {
         wp_send_json_error( 'No order data.' );
     }
@@ -637,13 +637,13 @@ add_shortcode( 'doc_group', function ( $atts ) {
 
         $html .= '<li class="docmgr-file-item">';
         $html .= '<span class="docmgr-file-icon">' . $icon . '</span>';
-        $html .= '<a class="docmgr-file-link" href="' . esc_url( $url ) . '" target="_blank" download>';
+        $html .= '<a class="docmgr-file-link" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" download>';
         $html .= $name;
         $html .= '</a>';
         if ( $size ) {
             $html .= '<span class="docmgr-file-size">' . esc_html( $size ) . '</span>';
         }
-        $html .= '<span class="docmgr-file-ext">' . strtoupper( $ext ) . '</span>';
+        $html .= '<span class="docmgr-file-ext">' . esc_html( strtoupper( $ext ) ) . '</span>';
         $html .= '</li>';
     }
 

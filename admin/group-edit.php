@@ -5,7 +5,7 @@ global $wpdb;
 $groups_table = $wpdb->prefix . 'docmgr_groups';
 $files_table  = $wpdb->prefix . 'docmgr_files';
 
-$group_id = isset( $_GET['group_id'] ) ? absint( $_GET['group_id'] ) : 0;
+$group_id = isset( $_GET['group_id'] ) ? absint( wp_unslash( $_GET['group_id'] ) ) : 0;
 $is_new   = ( ! $group_id );
 $group    = null;
 $files    = array();
@@ -49,7 +49,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=docmgr' ) ); ?>" class="docmgr-back-link">
                 <span class="dashicons dashicons-arrow-left-alt2"></span>
             </a>
-            <?php echo $is_new ? 'Create New Group' : 'Edit Group'; ?>
+            <?php echo esc_html( $is_new ? 'Create New Group' : 'Edit Group' ); ?>
         </h1>
         <?php if ( ! $is_new ) : ?>
             <div class="docmgr-shortcode-wrap docmgr-header-shortcode">
@@ -72,16 +72,16 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
                        value="<?php echo $group ? esc_attr( $group->name ) : ''; ?>"
                        placeholder="Enter group name..."
                        autofocus>
-                <button type="button" id="docmgr-save-group" class="docmgr-btn-primary" data-group-id="<?php echo $group_id; ?>">
+                <button type="button" id="docmgr-save-group" class="docmgr-btn-primary" data-group-id="<?php echo esc_attr( $group_id ); ?>">
                     <span class="dashicons dashicons-saved"></span>
-                    <?php echo $is_new ? 'Create Group' : 'Save Name'; ?>
+                    <?php echo esc_html( $is_new ? 'Create Group' : 'Save Name' ); ?>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Upload + File List (only show for existing groups) -->
-    <div id="docmgr-files-section" class="<?php echo $is_new ? 'docmgr-hidden' : ''; ?>">
+    <div id="docmgr-files-section" class="<?php echo esc_attr( $is_new ? 'docmgr-hidden' : '' ); ?>">
 
         <!-- Dropzone -->
         <div class="docmgr-card">
@@ -120,7 +120,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
                 <span class="docmgr-file-count" id="docmgr-file-count"><?php echo count( $files ); ?></span>
             </h2>
 
-            <div id="docmgr-file-list" class="docmgr-file-list" data-group-id="<?php echo $group_id; ?>">
+            <div id="docmgr-file-list" class="docmgr-file-list" data-group-id="<?php echo esc_attr( $group_id ); ?>">
                 <?php if ( empty( $files ) ) : ?>
                     <div class="docmgr-empty-files" id="docmgr-empty-files">
                         <span class="dashicons dashicons-media-document"></span>
@@ -160,7 +160,7 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
             </div>
         </div>
         <div class="docmgr-file-actions">
-            <a href="{{data.url}}" class="docmgr-action-btn" title="Download" target="_blank" download>
+            <a href="{{data.url}}" class="docmgr-action-btn" title="Download" target="_blank" rel="noopener noreferrer" download>
                 <span class="dashicons dashicons-download"></span>
             </a>
             <button type="button" class="docmgr-action-btn docmgr-remove-btn" title="Remove from group" data-file-id="{{data.id}}">
@@ -172,5 +172,5 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
 
 <script>
     // Pass file data to JS
-    var docmgrFiles = <?php echo json_encode( $files ); ?>;
+    var docmgrFiles = <?php echo wp_json_encode( $files ); ?>;
 </script>

@@ -68,18 +68,18 @@ $groups = $wpdb->get_results(
                             <strong><a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $group->name ); ?></a></strong>
                         </td>
                         <td class="column-count">
-                            <span class="docmgr-badge"><?php echo intval( $group->file_count ); ?></span>
+                            <span class="docmgr-badge"><?php echo esc_html( absint( $group->file_count ) ); ?></span>
                         </td>
                         <td class="column-shortcode">
                             <div class="docmgr-shortcode-wrap">
-                                <code id="shortcode-<?php echo $group->id; ?>"><?php echo esc_html( $shortcode ); ?></code>
+                                <code id="shortcode-<?php echo esc_attr( $group->id ); ?>"><?php echo esc_html( $shortcode ); ?></code>
                                 <button type="button" class="docmgr-copy-btn" data-shortcode="<?php echo esc_attr( $shortcode ); ?>" title="Copy shortcode">
                                     <span class="dashicons dashicons-clipboard"></span>
                                 </button>
                             </div>
                         </td>
                         <td class="column-date">
-                            <?php echo date_i18n( get_option( 'date_format' ), strtotime( $group->created_at ) ); ?>
+                            <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $group->created_at ) ) ); ?>
                         </td>
                         <td class="column-actions">
                             <a href="<?php echo esc_url( $edit_url ); ?>" class="docmgr-action-btn docmgr-action-edit" title="Edit">
