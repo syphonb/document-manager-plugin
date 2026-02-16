@@ -10,7 +10,12 @@
         var $existing = $('.docmgr-toast');
         if ($existing.length) $existing.remove();
 
-        var $toast = $('<div class="docmgr-toast ' + (type || '') + '">' + message + '</div>');
+        var toastClass = 'docmgr-toast';
+        if (type) {
+            toastClass += ' ' + type;
+        }
+
+        var $toast = $('<div>', { 'class': toastClass }).text(message || '');
         $('body').append($toast);
         setTimeout(function () { $toast.addClass('show'); }, 10);
         setTimeout(function () {
@@ -42,26 +47,63 @@
 
     /* ── Render a file row from data ─────────────── */
     function renderFileRow(file) {
-        var html = '<div class="docmgr-file-row" data-file-id="' + file.id + '">';
-        html += '<div class="docmgr-file-handle" title="Drag to reorder"><span class="dashicons dashicons-menu"></span></div>';
-        html += '<div class="docmgr-file-icon-wrap"><span class="docmgr-file-type-icon" data-ext="' + file.ext + '">' + getFileTypeLabel(file.ext) + '</span></div>';
-        html += '<div class="docmgr-file-info">';
-        html += '<div class="docmgr-file-name-wrap">';
-        html += '<span class="docmgr-file-name-text">' + $('<span>').text(file.display_name).html() + '</span>';
-        html += '<input type="text" class="docmgr-file-name-input docmgr-hidden" value="' + $('<span>').text(file.display_name).html() + '">';
-        html += '<button type="button" class="docmgr-rename-btn" title="Rename"><span class="dashicons dashicons-edit-page"></span></button>';
-        html += '<button type="button" class="docmgr-rename-save docmgr-hidden" title="Save name"><span class="dashicons dashicons-yes-alt"></span></button>';
-        html += '<button type="button" class="docmgr-rename-cancel docmgr-hidden" title="Cancel"><span class="dashicons dashicons-dismiss"></span></button>';
-        html += '</div>';
-        html += '<div class="docmgr-file-meta">';
-        html += '<span class="docmgr-file-ext-badge">' + (file.ext || 'file') + '</span>';
-        html += '<span class="docmgr-file-size">' + (file.size || '') + '</span>';
-        html += '</div></div>';
-        html += '<div class="docmgr-file-actions">';
-        html += '<a href="' + file.url + '" class="docmgr-action-btn" title="Download" target="_blank" download><span class="dashicons dashicons-download"></span></a>';
-        html += '<button type="button" class="docmgr-action-btn docmgr-remove-btn" title="Remove from group" data-file-id="' + file.id + '"><span class="dashicons dashicons-no-alt"></span></button>';
-        html += '</div></div>';
-        return html;
+        var fileName = String(file.display_name || '');
+        var fileExt = String(file.ext || 'file');
+        var fileSize = String(file.size || '');
+        var fileUrl = String(file.url || '#');
+        var fileId = parseInt(file.id, 10) || 0;
+
+        var $row = $('<div>', { 'class': 'docmgr-file-row' }).attr('data-file-id', fileId);
+
+        var $handle = $('<div>', { 'class': 'docmgr-file-handle', 'title': 'Drag to reorder' })
+            .append($('<span>', { 'class': 'dashicons dashicons-menu' }));
+
+        var $icon = $('<div>', { 'class': 'docmgr-file-icon-wrap' })
+            .append(
+                $('<span>', { 'class': 'docmgr-file-type-icon' })
+                    .attr('data-ext', fileExt)
+                    .text(getFileTypeLabel(fileExt))
+            );
+
+        var $nameWrap = $('<div>', { 'class': 'docmgr-file-name-wrap' })
+            .append($('<span>', { 'class': 'docmgr-file-name-text' }).text(fileName))
+            .append($('<input>', { 'type': 'text', 'class': 'docmgr-file-name-input docmgr-hidden' }).val(fileName))
+            .append(
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-btn', 'title': 'Rename' })
+                    .append($('<span>', { 'class': 'dashicons dashicons-edit-page' }))
+            )
+            .append(
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-save docmgr-hidden', 'title': 'Save name' })
+                    .append($('<span>', { 'class': 'dashicons dashicons-yes-alt' }))
+            )
+            .append(
+                $('<button>', { 'type': 'button', 'class': 'docmgr-rename-cancel docmgr-hidden', 'title': 'Cancel' })
+                    .append($('<span>', { 'class': 'dashicons dashicons-dismiss' }))
+            );
+
+        var $meta = $('<div>', { 'class': 'docmgr-file-meta' })
+            .append($('<span>', { 'class': 'docmgr-file-ext-badge' }).text(fileExt))
+            .append($('<span>', { 'class': 'docmgr-file-size' }).text(fileSize));
+
+        var $info = $('<div>', { 'class': 'docmgr-file-info' }).append($nameWrap).append($meta);
+
+        var $download = $('<a>', {
+            'class': 'docmgr-action-btn',
+            'title': 'Download',
+            'target': '_blank',
+            'rel': 'noopener noreferrer',
+            'download': 'download'
+        }).attr('href', fileUrl).append($('<span>', { 'class': 'dashicons dashicons-download' }));
+
+        var $remove = $('<button>', {
+            'type': 'button',
+            'class': 'docmgr-action-btn docmgr-remove-btn',
+            'title': 'Remove from group'
+        }).attr('data-file-id', fileId).append($('<span>', { 'class': 'dashicons dashicons-no-alt' }));
+
+        var $actions = $('<div>', { 'class': 'docmgr-file-actions' }).append($download).append($remove);
+
+        return $row.append($handle).append($icon).append($info).append($actions);
     }
 
     /* ── Initialise SortableJS ──────────────────── */
@@ -98,11 +140,11 @@
     function loadFiles() {
         if (typeof docmgrFiles === 'undefined' || !docmgrFiles.length) return;
         $('#docmgr-empty-files').remove();
-        var html = '';
+        var $list = $('#docmgr-file-list');
+        $list.empty();
         docmgrFiles.forEach(function (file) {
-            html += renderFileRow(file);
+            $list.append(renderFileRow(file));
         });
-        $('#docmgr-file-list').html(html);
         initSortable();
     }
 
