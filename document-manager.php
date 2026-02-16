@@ -18,6 +18,48 @@ define( 'DOCMGR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DOCMGR_URL', plugin_dir_url( __FILE__ ) );
 
 /**
+ * Get one document group row by ID.
+ *
+ * @param int $group_id Group ID.
+ * @return object|null
+ */
+function docmgr_get_group( $group_id ) {
+    global $wpdb;
+    $group_id = absint( $group_id );
+    if ( ! $group_id ) {
+        return null;
+    }
+
+    return $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}docmgr_groups WHERE id = %d",
+            $group_id
+        )
+    );
+}
+
+/**
+ * Get one document file row by ID.
+ *
+ * @param int $file_id File record ID.
+ * @return object|null
+ */
+function docmgr_get_file( $file_id ) {
+    global $wpdb;
+    $file_id = absint( $file_id );
+    if ( ! $file_id ) {
+        return null;
+    }
+
+    return $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}docmgr_files WHERE id = %d",
+            $file_id
+        )
+    );
+}
+
+/**
  * ─── Activation: create DB tables ───
  */
 function docmgr_activate() {
@@ -161,9 +203,15 @@ add_action( 'wp_ajax_docmgr_create_group', function () {
     if ( empty( $name ) ) {
         wp_send_json_error( 'Group name is required.' );
     }
-    $wpdb->insert( $wpdb->prefix . 'docmgr_groups', array(
+
+    $created = $wpdb->insert( $wpdb->prefix . 'docmgr_groups', array(
         'name' => $name,
     ), array( '%s' ) );
+
+    if ( false === $created || empty( $wpdb->insert_id ) ) {
+        wp_send_json_error( 'Failed to create group.' );
+    }
+
     wp_send_json_success( array( 'id' => $wpdb->insert_id, 'name' => $name ) );
 });
 
@@ -176,13 +224,23 @@ add_action( 'wp_ajax_docmgr_update_group', function () {
     if ( ! $id || empty( $name ) ) {
         wp_send_json_error( 'Invalid data.' );
     }
-    $wpdb->update(
+    $group = docmgr_get_group( $id );
+    if ( ! $group ) {
+        wp_send_json_error( 'Group not found.' );
+    }
+
+    $updated = $wpdb->update(
         $wpdb->prefix . 'docmgr_groups',
         array( 'name' => $name ),
         array( 'id' => $id ),
         array( '%s' ),
         array( '%d' )
     );
+
+    if ( false === $updated ) {
+        wp_send_json_error( 'Failed to update group.' );
+    }
+
     wp_send_json_success();
 });
 
@@ -194,8 +252,22 @@ add_action( 'wp_ajax_docmgr_delete_group', function () {
     if ( ! $id ) {
         wp_send_json_error( 'Invalid group.' );
     }
-    $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $id ), array( '%d' ) );
-    $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $id ), array( '%d' ) );
+
+    $group = docmgr_get_group( $id );
+    if ( ! $group ) {
+        wp_send_json_error( 'Group not found.' );
+    }
+
+    $deleted_files = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'group_id' => $id ), array( '%d' ) );
+    if ( false === $deleted_files ) {
+        wp_send_json_error( 'Failed to delete group files.' );
+    }
+
+    $deleted_group = $wpdb->delete( $wpdb->prefix . 'docmgr_groups', array( 'id' => $id ), array( '%d' ) );
+    if ( false === $deleted_group || 0 === $deleted_group ) {
+        wp_send_json_error( 'Failed to delete group.' );
+    }
+
     wp_send_json_success();
 });
 
@@ -207,6 +279,10 @@ add_action( 'wp_ajax_docmgr_upload_files', function () {
     $group_id = isset( $_POST['group_id'] ) ? absint( $_POST['group_id'] ) : 0;
     if ( ! $group_id ) {
         wp_send_json_error( 'No group specified.' );
+    }
+
+    if ( ! docmgr_get_group( $group_id ) ) {
+        wp_send_json_error( 'Group not found.' );
     }
 
     if ( empty( $_FILES['files'] ) ) {
@@ -245,12 +321,17 @@ add_action( 'wp_ajax_docmgr_upload_files', function () {
         $max_order++;
         $display_name = pathinfo( $single['name'], PATHINFO_FILENAME );
 
-        $wpdb->insert( $files_table, array(
+        $inserted = $wpdb->insert( $files_table, array(
             'group_id'      => $group_id,
             'attachment_id'  => $attach_id,
             'display_name'   => sanitize_text_field( $display_name ),
             'sort_order'     => $max_order,
         ), array( '%d', '%d', '%s', '%d' ) );
+
+        if ( false === $inserted || empty( $wpdb->insert_id ) ) {
+            wp_delete_attachment( $attach_id, true );
+            continue;
+        }
 
         $file_url = wp_get_attachment_url( $attach_id );
         $file_path = get_attached_file( $attach_id );
@@ -260,12 +341,16 @@ add_action( 'wp_ajax_docmgr_upload_files', function () {
         $uploaded[] = array(
             'id'            => $wpdb->insert_id,
             'attachment_id' => $attach_id,
-            'display_name'  => $display_name,
+            'display_name'  => sanitize_text_field( $display_name ),
             'sort_order'    => $max_order,
             'url'           => $file_url,
             'size'          => $file_size,
             'ext'           => strtolower( $file_ext ),
         );
+    }
+
+    if ( empty( $uploaded ) ) {
+        wp_send_json_error( 'No files were uploaded.' );
     }
 
     wp_send_json_success( $uploaded );
@@ -283,6 +368,10 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
         wp_send_json_error( 'Invalid data.' );
     }
 
+    if ( ! docmgr_get_group( $group_id ) ) {
+        wp_send_json_error( 'Group not found.' );
+    }
+
     $files_table = $wpdb->prefix . 'docmgr_files';
     $max_order   = (int) $wpdb->get_var( $wpdb->prepare(
         "SELECT MAX(sort_order) FROM {$files_table} WHERE group_id = %d", $group_id
@@ -291,6 +380,10 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
     $added = array();
 
     foreach ( $attachment_ids as $attach_id ) {
+        if ( 'attachment' !== get_post_type( $attach_id ) ) {
+            continue;
+        }
+
         // Skip if already in this group
         $existing = $wpdb->get_var( $wpdb->prepare(
             "SELECT id FROM {$files_table} WHERE group_id = %d AND attachment_id = %d",
@@ -304,12 +397,16 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
         $filename     = get_the_title( $attach_id ) ?: basename( get_attached_file( $attach_id ) );
         $display_name = pathinfo( $filename, PATHINFO_FILENAME );
 
-        $wpdb->insert( $files_table, array(
+        $inserted = $wpdb->insert( $files_table, array(
             'group_id'      => $group_id,
             'attachment_id'  => $attach_id,
             'display_name'   => sanitize_text_field( $display_name ),
             'sort_order'     => $max_order,
         ), array( '%d', '%d', '%s', '%d' ) );
+
+        if ( false === $inserted || empty( $wpdb->insert_id ) ) {
+            continue;
+        }
 
         $file_url  = wp_get_attachment_url( $attach_id );
         $file_path = get_attached_file( $attach_id );
@@ -319,7 +416,7 @@ add_action( 'wp_ajax_docmgr_add_media', function () {
         $added[] = array(
             'id'            => $wpdb->insert_id,
             'attachment_id' => $attach_id,
-            'display_name'  => $display_name,
+            'display_name'  => sanitize_text_field( $display_name ),
             'sort_order'    => $max_order,
             'url'           => $file_url,
             'size'          => $file_size,
@@ -339,13 +436,24 @@ add_action( 'wp_ajax_docmgr_rename_file', function () {
     if ( ! $file_id || empty( $name ) ) {
         wp_send_json_error( 'Invalid data.' );
     }
-    $wpdb->update(
+
+    $file = docmgr_get_file( $file_id );
+    if ( ! $file ) {
+        wp_send_json_error( 'File not found.' );
+    }
+
+    $updated = $wpdb->update(
         $wpdb->prefix . 'docmgr_files',
         array( 'display_name' => $name ),
         array( 'id' => $file_id ),
         array( '%s' ),
         array( '%d' )
     );
+
+    if ( false === $updated ) {
+        wp_send_json_error( 'Failed to rename file.' );
+    }
+
     wp_send_json_success();
 });
 
@@ -357,7 +465,17 @@ add_action( 'wp_ajax_docmgr_remove_file', function () {
     if ( ! $file_id ) {
         wp_send_json_error( 'Invalid file.' );
     }
-    $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'id' => $file_id ), array( '%d' ) );
+
+    $file = docmgr_get_file( $file_id );
+    if ( ! $file ) {
+        wp_send_json_error( 'File not found.' );
+    }
+
+    $deleted = $wpdb->delete( $wpdb->prefix . 'docmgr_files', array( 'id' => $file_id ), array( '%d' ) );
+    if ( false === $deleted || 0 === $deleted ) {
+        wp_send_json_error( 'Failed to remove file.' );
+    }
+
     wp_send_json_success();
 });
 
@@ -369,14 +487,27 @@ add_action( 'wp_ajax_docmgr_reorder_files', function () {
     if ( empty( $order ) ) {
         wp_send_json_error( 'No order data.' );
     }
+
+    if ( count( array_unique( $order ) ) !== count( $order ) ) {
+        wp_send_json_error( 'Duplicate file IDs in order data.' );
+    }
+
     foreach ( $order as $position => $file_id ) {
-        $wpdb->update(
+        if ( ! docmgr_get_file( $file_id ) ) {
+            wp_send_json_error( 'One or more files no longer exist.' );
+        }
+
+        $updated = $wpdb->update(
             $wpdb->prefix . 'docmgr_files',
             array( 'sort_order' => $position ),
             array( 'id' => $file_id ),
             array( '%d' ),
             array( '%d' )
         );
+
+        if ( false === $updated ) {
+            wp_send_json_error( 'Failed to reorder files.' );
+        }
     }
     wp_send_json_success();
 });
