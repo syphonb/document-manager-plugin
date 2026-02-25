@@ -87,6 +87,67 @@
     /* By default grey, override below per type */
 }
 
+/* ── Accordion ─────────────────────────────────── */
+.docmgr-accordion {
+    margin: 1.5em 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.docmgr-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #f9fafb;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.docmgr-accordion-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.docmgr-accordion-toggle::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #6b7280;
+    border-bottom: 2px solid #6b7280;
+    transform: rotate(-45deg);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.docmgr-accordion[open] > .docmgr-accordion-toggle::after {
+    transform: rotate(45deg);
+}
+
+.docmgr-accordion-toggle:hover {
+    background: #fff;
+    color: #2271b1;
+}
+
+.docmgr-accordion-toggle:hover::after {
+    border-color: #2271b1;
+}
+
+.docmgr-accordion-content {
+    padding: 4px 18px 14px;
+}
+
+.docmgr-accordion-content .docmgr-file-list {
+    margin-top: 6px;
+}
+
 /* ── Responsive ────────────────────────────────── */
 @media (max-width: 600px) {
     .docmgr-file-item {

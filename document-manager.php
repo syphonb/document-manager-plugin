@@ -3,7 +3,7 @@
  * Plugin Name: Document Manager
  * Plugin URI:
  * Description: Create document groups, bulk upload files via drag-and-drop, rename/reorder/remove files, and embed download lists via shortcode.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: CRISPM
  * License: GPL v2 or later
  * Text Domain: document-manager
@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'DOCMGR_VERSION', '1.0.0' );
-define( 'DOCMGR_DB_VERSION', '1.1.0' );
+define( 'DOCMGR_VERSION', '1.1.0' );
+define( 'DOCMGR_DB_VERSION', '1.2.0' );
 define( 'DOCMGR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DOCMGR_URL', plugin_dir_url( __FILE__ ) );
 
@@ -127,6 +127,7 @@ function docmgr_get_schema_sql() {
     return "CREATE TABLE {$groups_table} (
         id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
         name varchar(255) NOT NULL DEFAULT '',
+        accordion tinyint(1) NOT NULL DEFAULT 0,
         created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id)
@@ -306,7 +307,7 @@ function docmgr_admin_enqueue( $hook ) {
             'orderSaved'           => __( 'Order saved', 'document-manager' ),
             'pleaseEnterGroupName' => __( 'Please enter a group name.', 'document-manager' ),
             'groupCreated'         => __( 'Group created!', 'document-manager' ),
-            'groupNameSaved'       => __( 'Group name saved.', 'document-manager' ),
+            'groupSaved'           => __( 'Group saved.', 'document-manager' ),
             'requestFailed'        => __( 'Request failed.', 'document-manager' ),
             'shortcodeCopied'      => __( 'Shortcode copied!', 'document-manager' ),
             'selectDocuments'      => __( 'Select Documents', 'document-manager' ),
@@ -323,6 +324,7 @@ function docmgr_admin_enqueue( $hook ) {
             'renamed'              => __( 'Renamed!', 'document-manager' ),
             'removeConfirm'        => __( 'Remove this file from the group? (The file remains in your Media Library.)', 'document-manager' ),
             'fileRemoved'          => __( 'File removed.', 'document-manager' ),
+            'accordionLabel'       => __( 'Display as accordion (collapsed by default)', 'document-manager' ),
         ),
     ) );
 }
@@ -364,9 +366,12 @@ add_action( 'wp_ajax_docmgr_create_group', function () {
         wp_send_json_error( __( 'Group name is required.', 'document-manager' ) );
     }
 
+    $accordion = isset( $_POST['accordion'] ) ? min( absint( $_POST['accordion'] ), 1 ) : 0;
+
     $created = $wpdb->insert( $wpdb->prefix . 'docmgr_groups', array(
-        'name' => $name,
-    ), array( '%s' ) );
+        'name'      => $name,
+        'accordion' => $accordion,
+    ), array( '%s', '%d' ) );
 
     if ( false === $created || empty( $wpdb->insert_id ) ) {
         wp_send_json_error( __( 'Failed to create group.', 'document-manager' ) );
@@ -389,11 +394,13 @@ add_action( 'wp_ajax_docmgr_update_group', function () {
         wp_send_json_error( __( 'Group not found.', 'document-manager' ) );
     }
 
+    $accordion = isset( $_POST['accordion'] ) ? min( absint( $_POST['accordion'] ), 1 ) : 0;
+
     $updated = $wpdb->update(
         $wpdb->prefix . 'docmgr_groups',
-        array( 'name' => $name ),
+        array( 'name' => $name, 'accordion' => $accordion ),
         array( 'id' => $id ),
-        array( '%s' ),
+        array( '%s', '%d' ),
         array( '%d' )
     );
 
@@ -686,7 +693,12 @@ add_shortcode( 'doc_group', function ( $atts ) {
         $group_id
     ) );
 
+    $use_accordion = ! empty( $group->accordion );
+
     if ( empty( $files ) ) {
+        if ( $use_accordion ) {
+            return '<details class="docmgr-accordion"><summary class="docmgr-accordion-toggle">' . esc_html( $group->name ) . '</summary><div class="docmgr-accordion-content"><p>' . esc_html__( 'No documents available.', 'document-manager' ) . '</p></div></details>';
+        }
         return '<div class="docmgr-group"><p>' . esc_html__( 'No documents available.', 'document-manager' ) . '</p></div>';
     }
 
@@ -711,7 +723,14 @@ add_shortcode( 'doc_group', function ( $atts ) {
         'csv'  => '📊',
     );
 
-    $html = '<div class="docmgr-group">';
+    if ( $use_accordion ) {
+        $html = '<details class="docmgr-accordion">';
+        $html .= '<summary class="docmgr-accordion-toggle">' . esc_html( $group->name ) . '</summary>';
+        $html .= '<div class="docmgr-accordion-content">';
+    } else {
+        $html = '<div class="docmgr-group">';
+    }
+
     $html .= '<ul class="docmgr-file-list">';
 
     foreach ( $files as $file ) {
@@ -735,7 +754,13 @@ add_shortcode( 'doc_group', function ( $atts ) {
     }
 
     $html .= '</ul>';
-    $html .= '</div>';
+
+    if ( $use_accordion ) {
+        $html .= '</div>';
+        $html .= '</details>';
+    } else {
+        $html .= '</div>';
+    }
 
     return $html;
 });

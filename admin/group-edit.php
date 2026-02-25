@@ -74,9 +74,18 @@ $shortcode = $group_id ? '[doc_group id=' . $group_id . ']' : '';
                        autofocus>
                 <button type="button" id="docmgr-save-group" class="docmgr-btn-primary" data-group-id="<?php echo esc_attr( $group_id ); ?>">
                     <span class="dashicons dashicons-saved"></span>
-                    <?php echo esc_html( $is_new ? __( 'Create Group', 'document-manager' ) : __( 'Save Name', 'document-manager' ) ); ?>
+                    <?php echo esc_html( $is_new ? __( 'Create Group', 'document-manager' ) : __( 'Save', 'document-manager' ) ); ?>
                 </button>
             </div>
+        </div>
+        <div class="docmgr-field-row docmgr-checkbox-row">
+            <label class="docmgr-checkbox-label">
+                <input type="checkbox"
+                       id="docmgr-accordion"
+                       value="1"
+                       <?php checked( $group && ! empty( $group->accordion ) ); ?>>
+                <?php esc_html_e( 'Display as accordion (collapsed by default)', 'document-manager' ); ?>
+            </label>
         </div>
     </div>
 

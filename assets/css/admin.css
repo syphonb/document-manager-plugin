@@ -161,6 +161,22 @@
     outline: none;
 }
 
+/* ── Checkbox Row ─────────────────────────────── */
+.docmgr-checkbox-row {
+    margin-top: 4px;
+}
+.docmgr-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #1d2327;
+    cursor: pointer;
+}
+.docmgr-checkbox-label input[type="checkbox"] {
+    margin: 0;
+}
+
 /* ── Empty State ───────────────────────────────── */
 .docmgr-empty-state {
     text-align: center;

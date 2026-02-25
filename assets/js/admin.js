@@ -175,7 +175,8 @@
             action: isNew ? 'docmgr_create_group' : 'docmgr_update_group',
             nonce: docmgr.nonce,
             group_id: groupId,
-            name: name
+            name: name,
+            accordion: $('#docmgr-accordion').is(':checked') ? 1 : 0
         }).done(function (res) {
             if (res.success) {
                 if (isNew) {
@@ -183,7 +184,7 @@
                     // Redirect to edit page
                     window.location.href = docmgr.ajax_url.replace('/wp-admin/admin-ajax.php', '/wp-admin/admin.php?page=docmgr&action=edit&group_id=' + res.data.id);
                 } else {
-                    showToast(t('groupNameSaved', 'Group name saved.'), 'success');
+                    showToast(t('groupSaved', 'Group saved.'), 'success');
                 }
             } else {
                 showToast(res.data || 'Error', 'error');
